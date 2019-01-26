@@ -24,8 +24,13 @@
 import sys
 import PIL
 
-def grade(form):
+def grade(form, output_im, output_file):
     print("Recognizing "+form+"...")
+    
+def output(output_file):
+    print("Outputting to "+output_file)
+    print("Output completed.")
+    
 ################################################################################
 # Run program
 ################################################################################

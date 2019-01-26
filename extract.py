@@ -10,14 +10,15 @@
 # Derrick Eckardt
 # derrick@iu.edu
 # 
-# Completed on February 12, 2019
+# Completed on February 12, 2019. For the assignment details, please visit:
 #
-# For the assignment details, please visit:
+#   https://github.iu.edu/cs-b657-sp2019/derrick-a1/blob/master/a1.pdf
 #
-# https://github.iu.edu/cs-b657-sp2019/derrick-a1/blob/master/a1.pdf
+# For a complete details on this program, please visit the readme.md file at:
+#
+#   https://github.iu.edu/cs-b657-sp2019/derrick-a1/blob/master/README.md
 #
 ################################################################################
-################################################################################
-# Overall
-################################################################################
-################################################################################
+
+import sys
+import PIL
