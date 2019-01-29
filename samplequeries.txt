@@ -1,2 +1,5 @@
 time ./grade.py test-images/a-3.jpg output.jpg output.txt
 time ./grade.py test-images/a-27.jpg output.jpg output.txt
+
+# has an x
+time ./grade.py test-images/b-13.jpg output.jpg output.txt
