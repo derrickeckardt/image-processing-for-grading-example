@@ -62,7 +62,7 @@ def convolute2(im,im_px, filter_matrix):
     convol_row, convol_col = filter_matrix.shape
     row_edges = int(convol_row/2)
     col_edges = int(convol_col/2)
-    output_im = Image.new("RGB", (im.width, im.height), color = (0,0,0))
+    output_im = Image.new("L", (im.width, im.height), color = 0)
     for i in range(im.width):
         for j in range(im.height):
             convol_total = np.array([0]*3)
@@ -72,7 +72,7 @@ def convolute2(im,im_px, filter_matrix):
                     interim_2 = edged_im_px[i+x,j+y]
                     interim = np.multiply(interim_1,interim_2)
                     convol_total = interim + convol_total
-            output_im.putpixel((i,j),(int(convol_total[0]),int(convol_total[1]),int(convol_total[2])))
+            output_im.putpixel((i,j),int(convol_total[0]))
 
     return output_im
 
@@ -92,16 +92,18 @@ def grade(form, output_im, output_file):
 
 
     # filter intensities
-    binary_image_filter(im,px)
+   # binary_image_filter(im,px)
 
     # filter with gaussian to get rid of noise
+    box_blur_matrix = 1/9 * np.array([[1.0]*3]*3)
+
     # c - gaussian
     gaussian_matrix = np.array([[0.003, 0.013, 0.022, 0.013, 0.003],
                                 [0.013, 0.059, 0.097, 0.059, 0.013],
                                 [0.022, 0.097, 0.159, 0.097, 0.022],
                                 [0.013, 0.059, 0.097, 0.059, 0.013],
                                 [0.003, 0.013, 0.022, 0.013, 0.003]])
-    im = convolute2(im,px,gaussian_matrix)
+    im = convolute2(im,px,box_blur_matrix)
     px = im.load()
 
 
