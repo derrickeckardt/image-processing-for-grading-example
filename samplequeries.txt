@@ -1,1 +1,2 @@
 time ./grade.py test-images/a-3.jpg output.jpg output.txt
+time ./grade.py test-images/a-27.jpg output.jpg output.txt

@@ -25,14 +25,23 @@ import sys
 import PIL
 import profile
 from PIL import Image
+from collections import Counter
+from pprint import pprint
 
 def grade(form, output_im, output_file):
     print("Recognizing "+form+"...")
-    im = Image.open(form).convert('L')
-    print(im.getpixel((200,200)))
+    im = Image.open(form).convert('L')#.resize((680,880))
     print(im.size)  # 1700x2200
+    px = im.load()
+    intensity_count = Counter()
+
+    for x in range(im.width):
+        for y in range(im.height):
+            px[x,y] = 0 if px[x,y] < 128 else 255
+            intensity_count[px[x,y]] += 1
     #resize image to simplify calculation
-    
+    pprint(intensity_count)
+    im.save('resized_img.jpg')
     
 def output(output_file):
     print("Outputting to "+output_file)
