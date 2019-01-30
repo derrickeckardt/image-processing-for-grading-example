@@ -80,9 +80,15 @@ def convolute3(im,filter_matrix):
 def binary_image_filter(im, px):
     im_width = im.width
     im_height = im.height
+    instance = Counter()
+    instance_pre = Counter()
     for x in range(im_width):
         for y in range(im_height):
+            instance_pre[px[x,y]] += 1
             px[x,y] = 0 if px[x,y] < 128 else 255
+            instance[px[x,y]] += 1
+    print(instance_pre)
+    print(instance)
 
 def grade(form, output_im, output_file):
     print("Recognizing "+form+"...")
@@ -100,6 +106,7 @@ def grade(form, output_im, output_file):
         box_blur_matrix_dict[x] = {}
         for y in range(3):
             box_blur_matrix_dict[x][y] = 1.0/9.0
+
 
     # c - gaussian
     gaussian_matrix = np.array([[0.003, 0.013, 0.022, 0.013, 0.003],
