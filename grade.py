@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 #   ./grade.py : Grading automated scanned answer sheet:
 #     ./grade.py form.jpg output.jpg output.txt 
