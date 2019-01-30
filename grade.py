@@ -88,8 +88,9 @@ def grade(form, output_im, output_file):
     print("Recognizing "+form+"...")
     # resizing image
     # importing as grayscale
-    im = Image.open(form).convert('L').resize((850,1100))
+    im = Image.open(form).convert('L')#.resize((850,1100))
     px = im.load()
+
 
     # filter intensities
     binary_image_filter(im,px)
@@ -112,12 +113,13 @@ def grade(form, output_im, output_file):
     # print(timeit(lambda: im.filter(ImageFilter.Kernel((3,3),[1,1,1,1,1,1,1,1,1],9)), number =1))
 
     im = convolute3(im,box_blur_matrix_dict)
-    px = im.load()
 
     # filter intensities again, to get rid of noise
     binary_image_filter(im,px)
-
     im.save('resized_img.jpg')
+
+    copy_im = im.copy().resize((1,2200))
+    copy_im.save('thin_im.jpg')
     
 def output(output_file):
     print("Outputting to "+output_file)
