@@ -85,44 +85,46 @@ def binary_image_filter(im, px):
     for x in range(im_width):
         for y in range(im_height):
             instance_pre[px[x,y]] += 1
-            px[x,y] = 0 if px[x,y] < 128 else 255
+            px[x,y] = 255 if px[x,y] < 128 else 0
             instance[px[x,y]] += 1
     print(instance_pre)
     print(instance)
+    return im, px
 
-def grade(form, output_im, output_file):
-    print("Recognizing "+form+"...")
-    # resizing image
-    # importing as grayscale
-    im = Image.open(form).convert('L').resize((850,1100))
-    px = im.load()
-
+def find_angle(px):
+    for i in range(10):
+        print("ADD THE FIND ANGLE MODULE!")
+    return px
+    
+def simplify_image(im,px):
     # filter intensities
-    binary_image_filter(im,px)
+    im, px = binary_image_filter(im,px)
 
-    # filter with gaussian to get rid of noise
+    # filter with box blur to reduce noise
     box_blur_matrix_dict = {}
     for x in range(3):
         box_blur_matrix_dict[x] = {}
         for y in range(3):
             box_blur_matrix_dict[x][y] = 1.0/9.0
-
-
-    # c - gaussian
-    gaussian_matrix = np.array([[0.003, 0.013, 0.022, 0.013, 0.003],
-                                [0.013, 0.059, 0.097, 0.059, 0.013],
-                                [0.022, 0.097, 0.159, 0.097, 0.022],
-                                [0.013, 0.059, 0.097, 0.059, 0.013],
-                                [0.003, 0.013, 0.022, 0.013, 0.003]])
-
-    # print(timeit(lambda: convolute3(im,box_blur_matrix_dict), number = 1))
-    # print(timeit(lambda: im.filter(ImageFilter.Kernel((3,3),[1,1,1,1,1,1,1,1,1],9)), number =1))
-
     im = convolute3(im,box_blur_matrix_dict)
     px = im.load()
 
-    # filter intensities again, to get rid of noise
-    binary_image_filter(im,px)
+    # filter intensities again, to further get rid of noise
+    im, px = binary_image_filter(im,px)
+
+    return im, px
+
+def grade(form, output_im, output_file):
+    print("Recognizing "+form+"...")
+    # resizing image, importing as grayscale
+    im = Image.open(form).convert('L').resize((850,1100))
+    px = im.load()
+
+    # find angle of rotation
+    angle = find_angle(im,px)
+
+    # clear out noise and simplify image
+    im, px = simplify_image(im,px)
 
     im.save('resized_img.jpg')
     
