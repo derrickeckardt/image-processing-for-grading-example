@@ -116,17 +116,26 @@ def simplify_image(im,px):
 
 def grade(form, output_im, output_file):
     print("Recognizing "+form+"...")
+    print("FIX image and use of pixelaccess")
+    print("Change addedge and convolute to use pixel access to use pixelaccess")
+
     # resizing image, importing as grayscale
     im = Image.open(form).convert('L').resize((850,1100))
     px = im.load()
 
     # find angle of rotation
-    angle = find_angle(im,px)
-
+    angle = find_angle(px)
+    
     # clear out noise and simplify image
     im, px = simplify_image(im,px)
 
+    # look for boxes
+
+
+
     im.save('resized_img.jpg')
+
+
     
 def output(output_file):
     print("Outputting to "+output_file)
