@@ -77,7 +77,7 @@ def convolute(px,filter_matrix, width,height):
 def stark_difference(px_load, width, height):
     for x in range(width):
         for y in range(height):
-            px_load[x,y] = 255 if px_load[x,y] < 192 else 0
+            px_load[x,y] = 255 if px_load[x,y] < 160 else 0
     
 def grade(form, output_im, output_file):
     print("Importing "+form+"...")
@@ -104,6 +104,15 @@ def grade(form, output_im, output_file):
 
     # Starken the difference
     stark_difference(px2,width,height)
+
+    # find angle to rotate image
+    for y in range(1099,1000,-1): # length
+        row_total = sum([px2[x,y] for x in range(width)])
+        if row_total > 0:
+            print(x,y)
+            break
+        
+            
 
     # Final output image
     im2.save(output_im)
