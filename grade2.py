@@ -119,6 +119,21 @@ def grade(form, output_im, output_file):
     rp2 = (711,1039)
     
     area_rp = (rp2[1] - rp1[1])  * (rp2[0] - rp1[0])
+
+    def threshold(px,width,height,location):
+        print(height*(-1*location)+location,height+(location*height)+location,1+2*location)
+        for y in range(height*(-1*location)+location,height+(location*height)+location,1+2*location): # length
+            row_total = sum([px[x,y] for x in range(width)])
+            if row_total > 255*5:
+                break
+        print(width*(-1*location)+location,width+(location*width)+location,1+2*location)
+        print("x-range: ",height*(-1*location)+location,int(height/2)+location,1+2*location)
+        for z in range(width*(-1*location)+location,width+(location*width)+location,1+2*location): # width
+            column_total = sum([px[z,x] for x in range(height*(-1*location)+location,int(height/2)+location,1+2*location)])
+            if column_total > 255*5:
+                break
+        return z,y
+        
     
     # find reference point 1
     for y in range(0,height): # length
@@ -130,9 +145,13 @@ def grade(form, output_im, output_file):
         if column_total > 255*5:
             break
     cp1 = (z,y)
+    cp1_alt = threshold(px2,width,height,0)
+    cp2_alt = threshold(px2,width,height,-1)
+
     
     print("Refer 1 Point:",rp1[0],rp1[1])
-    print("Current Point:",z,y)
+    print("Current Point:",cp1[0],cp1[1])
+    print("Current Point_alt:",cp1_alt)
 
     # find reference point 2
     for y in range(height-1,-1,-1): # length
@@ -150,6 +169,8 @@ def grade(form, output_im, output_file):
 
     print("Refer 2 Point:",rp2[0],rp2[1])
     print("Current Point:",z,y)
+    print("Current Point_alt:",cp2_alt)
+
 
     print("Area RP:", area_rp)
     print("Area CP:", area_cp)
