@@ -30,6 +30,7 @@ from pprint import pprint
 import numpy as np
 from timeit import timeit
 import math
+import pandas as pd
 
 
 def add_edges_dict(px,filter_matrix, width, height):
@@ -80,9 +81,29 @@ def stark_difference(px_load, width, height):
         for y in range(height):
             px_load[x,y] = 255 if px_load[x,y] < 160 else 0
             
-def rotate_angle(px,width, height):
-    scale = 0
-    return scale
+def rotate_angle(rp1,rp2,cp1,cp2):
+    rp_ang = math.degrees(math.atan((rp2[1] - rp1[1])/(rp2[0] - rp1[0])))
+    cp_ang = math.degrees(math.atan((cp2[1] - cp1[1])/(cp2[0] - cp1[0])))
+    return rp_ang-cp_ang
+    
+def scale(rp1,rp2,cp1,cp2):
+    area_cp = (cp2[1] - cp1[1])  * (cp2[0] - cp1[0])
+    area_rp = (rp2[1] - rp1[1])  * (rp2[0] - rp1[0])
+    return (area_cp / area_rp)**0.5    
+    
+def ref_points(px,width,height,location):
+    # find the location of reference points
+    # upper left postion, location = 0, or bottom right, location = -1
+    # 255 used to make sure mreference points to accidently noise
+    for y in range(height*(-1*location)+location,height+(location*height)+location,1+2*location): # length
+        row_total = sum([px[x,y] for x in range(width)])
+        if row_total > 255*5:
+            break
+    for z in range(width*(-1*location)+location,width+(location*width)+location,1+2*location): # width
+        column_total = sum([px[z,x] for x in range(height*(-1*location)+location,int(height/2)+location,1+2*location)])
+        if column_total > 255*5:
+            break
+    return z,y
     
 def grade(form, output_im, output_file):
     print("Importing "+form+"...")
@@ -106,87 +127,70 @@ def grade(form, output_im, output_file):
     im2 = convolute(px1,box_blur,width,height)
     px2 = im2.load()
 
-    # Starken the difference
+    # Starken the difference, makes it easier to work with 0s instead of 255s
     stark_difference(px2,width,height)
 
     # find angle to rotate image
-    # use 255*5 as a threshold to allow for a little bit of noise
-    
-    # These reference point are from blank_image.jpg. Tthey coorspond to ideal orientation
-    # They were found using the algorithm below, and was then used to determine
-    # the orientation of any scanned document
+    # first, get reference points from blank_image.jpg. They coorspond to ideal
+    # orientation They were found using the threshold function onblank_image.jpg
+    # and then hard-coded, since not sure siystem we will be using
+    # then,we look for the same points in the any scanned document.
     rp1 = (92,68)
     rp2 = (711,1039)
     
-    area_rp = (rp2[1] - rp1[1])  * (rp2[0] - rp1[0])
+    # find reference points on original
+    cp1 = ref_points(px2,width,height,0)
+    cp2 = ref_points(px2,width,height,-1)
 
-    def threshold(px,width,height,location):
-        print(height*(-1*location)+location,height+(location*height)+location,1+2*location)
-        for y in range(height*(-1*location)+location,height+(location*height)+location,1+2*location): # length
-            row_total = sum([px[x,y] for x in range(width)])
-            if row_total > 255*5:
-                break
-        print(width*(-1*location)+location,width+(location*width)+location,1+2*location)
-        print("x-range: ",height*(-1*location)+location,int(height/2)+location,1+2*location)
-        for z in range(width*(-1*location)+location,width+(location*width)+location,1+2*location): # width
-            column_total = sum([px[z,x] for x in range(height*(-1*location)+location,int(height/2)+location,1+2*location)])
-            if column_total > 255*5:
-                break
-        return z,y
-        
+    # finally, rotate the image
+    im3 = im2.rotate(rotate_angle(rp1,rp2,cp1,cp2))
+    px3 = im3.load()
     
-    # find reference point 1
-    for y in range(0,height): # length
-        row_total = sum([px2[x,y] for x in range(width)])
-        if row_total > 255*5:
-            break
-    for z in range(0,width):
-        column_total = sum([px2[z,x] for x in range(0,400)])
-        if column_total > 255*5:
-            break
-    cp1 = (z,y)
-    cp1_alt = threshold(px2,width,height,0)
-    cp2_alt = threshold(px2,width,height,-1)
-
+    # Now, scan for incidents
+    # Since we know that boxes are 32 pixels wide by 32 pixels, we'll scan for
+    # for boxes with the most lit up pixels
+    # then eliminate the ones too close to others
+    # then, sort by density, so we can determine the filled out onces
+    # using a threshold of at least 40% are filled in
+    # and then by location, to determine the location of them, and if there is
+    #something to left of the number
+    filled_in = int(16 * 16 * 0.40)
+    something_there = 3
+    filled_in_dict = []
+    fin_df = pd.DataFrame(columns = ['box_total','x','y'])
+    print(fin_df)
+    something_there_dict = []
     
-    print("Refer 1 Point:",rp1[0],rp1[1])
-    print("Current Point:",cp1[0],cp1[1])
-    print("Current Point_alt:",cp1_alt)
+    range_16 = range(16)
+    for x in range(width-16):
+        for y in range(int(height/4), height-16):  # ignoring the first chunk of text
+            box_total = sum([1 for i in range(16) for j in range(16) if px3[x+i,y+j] == 255])
+            if box_total >= filled_in:
+                filled_in_dict.append(([box_total,x,y]))   
+                # if len(filled_in_dict) > 0:
+                #     if x-16 < filled_in_dict[-1][1] and y-16 < filled_in_dict[-1][2]:
+                #         if box_total > filled_in_dict[-1][0]:
+                #             filled_in_dict[-1] = [box_total,x,y]
+                #     else:
+                #         filled_in_dict.append(([box_total,x,y]))   
+                # else:
+                #     filled_in_dict.append(([box_total,x,y]))
 
-    # find reference point 2
-    for y in range(height-1,-1,-1): # length
-        row_total = sum([px2[x,y] for x in range(width)])
-        if row_total > 255*5:
-            break
-    for z in range(width-1,-1,-1):
-        column_total = sum([px2[z,x] for x in range(height-1,height-401,-1)])
-        if column_total > 255*5:
-            break
-        
-    cp2 = (z,y)
+            elif box_total >= something_there:
+                something_there_dict.append(([box_total,x,y]))
 
-    area_cp = (cp2[1] - cp1[1])  * (cp2[0] - cp1[0])
+    print(len(filled_in_dict))
+    print(filled_in_dict[0:5])
+    print(len(something_there_dict))                
+    print(something_there_dict[0:5])                        
 
-    print("Refer 2 Point:",rp2[0],rp2[1])
-    print("Current Point:",z,y)
-    print("Current Point_alt:",cp2_alt)
-
-
-    print("Area RP:", area_rp)
-    print("Area CP:", area_cp)
-
-    print(area_cp / area_rp)
-    scale = (area_cp / area_rp)**0.5
-    print(scale)
-    
-    rp_ang = math.degrees(math.atan((rp2[1] - rp1[1])/(rp2[0] - rp1[0])))
-    cp_ang = math.degrees(math.atan((cp2[1] - cp1[1])/(cp2[0] - cp1[0])))
-    print(rp_ang, cp_ang)
-
-    im3 = im2.rotate(rp_ang-cp_ang) 
+    for each in filled_in_dict:
+        for x in range(16):
+            for y in range(16):
+                px3[each[1]+x,each[2]+y] = 128
             
     # Final output image
-    im3.save("r-"+output_im)
+    im3.save(form[0:4]+output_im)
 
     print("Hooray! "+form + " was successfully graded.")
     print("Output files '"+output_file+"' and '"+output_im+"' succcessfuly graded.")
