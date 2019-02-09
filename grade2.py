@@ -29,6 +29,7 @@ from collections import Counter
 from pprint import pprint
 import numpy as np
 from timeit import timeit
+import math
 
 
 def add_edges_dict(px,filter_matrix, width, height):
@@ -78,15 +79,18 @@ def stark_difference(px_load, width, height):
     for x in range(width):
         for y in range(height):
             px_load[x,y] = 255 if px_load[x,y] < 160 else 0
+            
+def rotate_angle(px,width, height):
+    scale = 0
+    return scale
     
 def grade(form, output_im, output_file):
     print("Importing "+form+"...")
     # Set-up
     im = Image.open(form).convert('L').resize((850,1100))
     px = im.load()
-    width = im.width
-    height = im.height
-    
+    width, height = im.width, im.height
+
     # box blur filter matrix
     box_blur = {}
     for x in range(3):
@@ -106,16 +110,62 @@ def grade(form, output_im, output_file):
     stark_difference(px2,width,height)
 
     # find angle to rotate image
-    for y in range(1099,1000,-1): # length
+    # use 255*5 as a threshold to allow for a little bit of noise
+    
+    # These reference point are from blank_image.jpg. Tthey coorspond to ideal orientation
+    # They were found using the algorithm below, and was then used to determine
+    # the orientation of any scanned document
+    rp1 = (92,68)
+    rp2 = (711,1039)
+    
+    area_rp = (rp2[1] - rp1[1])  * (rp2[0] - rp1[0])
+    
+    # find reference point 1
+    for y in range(0,height): # length
         row_total = sum([px2[x,y] for x in range(width)])
-        if row_total > 0:
-            print(x,y)
+        if row_total > 255*5:
+            break
+    for z in range(0,width):
+        column_total = sum([px2[z,x] for x in range(0,400)])
+        if column_total > 255*5:
+            break
+    cp1 = (z,y)
+    
+    print("Refer 1 Point:",rp1[0],rp1[1])
+    print("Current Point:",z,y)
+
+    # find reference point 2
+    for y in range(height-1,-1,-1): # length
+        row_total = sum([px2[x,y] for x in range(width)])
+        if row_total > 255*5:
+            break
+    for z in range(width-1,-1,-1):
+        column_total = sum([px2[z,x] for x in range(height-1,height-401,-1)])
+        if column_total > 255*5:
             break
         
-            
+    cp2 = (z,y)
 
+    area_cp = (cp2[1] - cp1[1])  * (cp2[0] - cp1[0])
+
+    print("Refer 2 Point:",rp2[0],rp2[1])
+    print("Current Point:",z,y)
+
+    print("Area RP:", area_rp)
+    print("Area CP:", area_cp)
+
+    print(area_cp / area_rp)
+    scale = (area_cp / area_rp)**0.5
+    print(scale)
+    
+    rp_ang = math.degrees(math.atan((rp2[1] - rp1[1])/(rp2[0] - rp1[0])))
+    cp_ang = math.degrees(math.atan((cp2[1] - cp1[1])/(cp2[0] - cp1[0])))
+    print(rp_ang, cp_ang)
+
+    im3 = im2.rotate(rp_ang-cp_ang) 
+            
     # Final output image
-    im2.save(output_im)
+    im3.save("r-"+output_im)
 
     print("Hooray! "+form + " was successfully graded.")
     print("Output files '"+output_file+"' and '"+output_im+"' succcessfuly graded.")
