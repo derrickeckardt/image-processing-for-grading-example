@@ -30,7 +30,9 @@ from pprint import pprint
 import numpy as np
 from timeit import timeit
 import math
-import pandas as pd
+from operator import itemgetter
+import profile
+import cProfile
 
 
 def add_edges_dict(px,filter_matrix, width, height):
@@ -154,37 +156,61 @@ def grade(form, output_im, output_file):
     # using a threshold of at least 40% are filled in
     # and then by location, to determine the location of them, and if there is
     #something to left of the number
-    filled_in = int(16 * 16 * 0.40)
+    filled = int(16 * 16 * 0.30)
     something_there = 3
-    filled_in_dict = []
-    fin_df = pd.DataFrame(columns = ['box_total','x','y'])
-    print(fin_df)
-    something_there_dict = []
+    filled_x = []
+    filled_y = []
+    something_x = []
+    something_y = []
     
     range_16 = range(16)
-    for x in range(width-16):
-        for y in range(int(height/4), height-16):  # ignoring the first chunk of text
+    
+    def find_points():
+        for x in range(width-16):
+            for y in range(int(height/4), height-16):  # ignoring the first chunk of text
+                box_total = sum([1 for i in range(16) for j in range(16) if px3[x+i,y+j] == 255])
+                if box_total >= filled:
+                    # filled_y.append(([box_total,x,y]))   
+                    if len(filled_y) > 0:
+                        if y-8 < filled_y[-1][2] and x-8 < filled_y[-1][1] :
+                            if box_total > filled_y[-1][0]:
+                                filled_y[-1] = [box_total,x,y]
+                        else:
+                            filled_y.append(([box_total,x,y]))   
+                    else:
+                        filled_y.append(([box_total,x,y]))
+                elif box_total >= something_there:
+                    something_y.append(([box_total,x,y]))
+
+    find_points()                    
+
+    for y in range(int(height/4), height-16):  # ignoring the first chunk of text
+        for x in range(width-16):
             box_total = sum([1 for i in range(16) for j in range(16) if px3[x+i,y+j] == 255])
-            if box_total >= filled_in:
-                filled_in_dict.append(([box_total,x,y]))   
-                # if len(filled_in_dict) > 0:
-                #     if x-16 < filled_in_dict[-1][1] and y-16 < filled_in_dict[-1][2]:
-                #         if box_total > filled_in_dict[-1][0]:
-                #             filled_in_dict[-1] = [box_total,x,y]
-                #     else:
-                #         filled_in_dict.append(([box_total,x,y]))   
-                # else:
-                #     filled_in_dict.append(([box_total,x,y]))
-
+            if box_total >= filled:
+                if len(filled_x) > 0:
+                    if y-8 < filled_x[-1][2] and x-8 < filled_x[-1][1] :
+                        if box_total > filled_x[-1][0]:
+                            filled_x[-1] = [box_total,x,y]
+                    else:
+                        filled_x.append(([box_total,x,y]))   
+                else:
+                    filled_x.append(([box_total,x,y]))
             elif box_total >= something_there:
-                something_there_dict.append(([box_total,x,y]))
+                something_x.append(([box_total,x,y]))
+                
+    combined = []
+    for each in filled_x:
+        if each in filled_y:
+            combined.append(each)
 
-    print(len(filled_in_dict))
-    print(filled_in_dict[0:5])
-    print(len(something_there_dict))                
-    print(something_there_dict[0:5])                        
+    print(len(combined))
 
-    for each in filled_in_dict:
+    print(len(filled_x), len(filled_y))
+    # print(len(cross_filled))
+    print(len(something_x), len(something_y))                
+
+    for each in combined:
         for x in range(16):
             for y in range(16):
                 px3[each[1]+x,each[2]+y] = 128
@@ -203,5 +229,5 @@ def grade(form, output_im, output_file):
 form, output_im, output_file = sys.argv[1:]
 
 # Grade form
-# cProfile.run("grade(form, output_im, output_file)")
-grade(form, output_im, output_file)
+cProfile.run("grade(form, output_im, output_file)")
+# grade(form, output_im, output_file)
