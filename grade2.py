@@ -263,6 +263,11 @@ def grade(form, output_im, output_file):
     finalist = sorted(finalist, key=itemgetter(7,5))
     print(finalist)
 
+    last_number = 0
+    output_txt= open(output_file,"w+")
+    for each in finalist:
+        pass
+        
 
     # for i in range(len(rows)):
     #     row = rows.pop(0)
