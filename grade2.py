@@ -261,7 +261,6 @@ def grade(form, output_im, output_file):
         finalist[i].append(finalist[i][5] + finalist[i][6]*29)
 
     finalist = sorted(finalist, key=itemgetter(7,3))
-    print(finalist)
 
     last_number = 0
     x_crossed = ""

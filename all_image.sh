@@ -1,5 +1,5 @@
 #!/bin/bash
-time ./grade2.py test-images/a-3.jpg a-3output.jpg a-3output.txt
+time ./grade2.py test-images/a-3.jpg output_images/a-3output.jpg a-3output.txt
 time ./grade2.py test-images/a-27.jpg a-27output.jpg a-27output.txt
 time ./grade2.py test-images/a-30.jpg a-30output.jpg a-30output.txt
 time ./grade2.py test-images/a-48.jpg a-3output.jpg a-48output.txt
