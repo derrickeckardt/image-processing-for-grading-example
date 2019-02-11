@@ -219,6 +219,13 @@ def grade(form, output_im, output_file):
         box_total = sum([1 for i in range_16 for j in range_16 if px[x+i+x_spacer*multiple,y+j] == 255])
         return box_total
 
+    def big_box_check_total(point,multiple,px):
+        x,y = point[1:3]
+        x_spacer = 56 / 2
+        box_total = sum([1 for i in range(36) for j in range_16 if px[x+i+x_spacer*multiple,y+j] == 255])
+        return box_total
+
+
     # look for numbers of scratch marks written in margin as false positives
     finalist = []
     letters = [[1,"E"], [2, "D"], [3,"C"], [4,"B"], [5,"A"]]
@@ -226,7 +233,7 @@ def grade(form, output_im, output_file):
     for j in range(len(sublist)):
         for i, letter in letters:
             if box_check_total(sublist[j],i,px3) == 0:
-                if box_check_total(sublist[j],i-7,px3) >= 10:
+                if big_box_check_total(sublist[j],i-7.5,px3) >= 10:
                     finalist.append(sublist[j]+[letter,"x"])
                 else:
                     finalist.append(sublist[j]+[letter,""])
@@ -300,24 +307,6 @@ def grade(form, output_im, output_file):
         output_txt.write(new_line+"\n")
     output_txt.close
         
-
-    # for i in range(len(rows)):
-    #     row = rows.pop(0)
-    #     for j in range(len(row)):
-    #         final_dict[i+1] = {"value": point[3], "X" : point[4]}
-            
-        
-
-    # temporary output
-    for each in finalist:
-        for x in range_16:
-            for y in range_16:
-                px3[each[1]+x,each[2]+y] = 128
-        if each[4] == "x":
-            for x in range(8):
-                for y in range(8):
-                    px3[each[1]+x,each[2]+y] = 192
-
     # Final output image
     imi = Image.open(form).convert('RGB')
     imf = imi.rotate(angle_to_rotate)
@@ -338,16 +327,16 @@ def grade(form, output_im, output_file):
                 pxf[i*2+x-2,j*2+y-2] = (0,0,255)
         if each[4] == "x":
             if each[3] == "A":
-                multiple = -1.5
-            elif each[3] == "B":
                 multiple = -2.5
-            elif each[3] == "C":
+            elif each[3] == "B":
                 multiple = -3.5
-            elif each[3] == "D":
+            elif each[3] == "C":
                 multiple = -4.5
-            elif each[3] == "E":
+            elif each[3] == "D":
                 multiple = -5.5
-            for x in range(36):
+            elif each[3] == "E":
+                multiple = -6.5
+            for x in range(108):
                 for y in range(4):
                     pxf[i*2+x-2 + multiple*56,j*2+y-2] = (0,255,0)
                 for y in range(32,36):
@@ -355,16 +344,9 @@ def grade(form, output_im, output_file):
             for y in range(36):
                 for x in range(4):
                     pxf[i*2+x-2 + multiple*56,j*2+y-2] = (0,255,0)
-                for x in range(32,36):
+                for x in range(104,108):
                     pxf[i*2+x-2 + multiple*56,j*2+y-2] = (0,255,0)
             
-
-
-        # if each[4] == "x":
-        #     for x*2 in range(8):
-        #         for y in range(8):
-        #             pxf[each[1]*2+x,each[2]*2+y] = 192
-
     # Final output image
     im_done = imf.rotate(-1*angle_to_rotate)
     im_done.save(output_im)
