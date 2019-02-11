@@ -268,7 +268,7 @@ def grade(form, output_im, output_file):
     new_line = ""
     output_txt= open(output_file,"w+")
     for each in finalist:
-        if each[7] > last_number:
+        if each[7] > last_number and each[7]-1 == last_number:
             if last_number != 0:
                 if x_crossed == "x":
                     output_txt.write(new_line+" x"+"\n")
@@ -281,6 +281,12 @@ def grade(form, output_im, output_file):
             last_number += 1
         elif each[7] == last_number:
             new_line += each[3]
+        # else:
+        #     output_txt.write(str(last_number))
+        #     last_number += 1
+            
+            
+
     if x_crossed == "x":
         output_txt.write(new_line+" x"+"\n")
     else:
