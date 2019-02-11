@@ -156,13 +156,10 @@ def grade(form, output_im, output_file):
     # using a threshold of at least 40% are filled in
     # and then by location, to determine the location of them, and if there is
     #something to left of the number
-    filled = int(16 * 16 * 0.30)
-    something = 5
+    filled = int(16 * 16 * 0.25)
     filled_x = []
     filled_y = []
-    something_x = []
-    something_y = []
-    
+
     range_16 = range(16)
     
     for x in range(width-16):
@@ -178,16 +175,6 @@ def grade(form, output_im, output_file):
                         filled_y.append(([box_total,x,y]))   
                 else:
                     filled_y.append(([box_total,x,y]))
-            elif box_total >= something:
-                if len(something_y) > 0:
-                    if y-8 < something_y[-1][2] and x-8 < something_y[-1][1]:
-                        something_y.append(([box_total,x,y]))
-                        if box_total > something_y[-1][0]:
-                            something_y[-1] = [box_total,x,y]
-                    else:
-                        something_y.append(([box_total,x,y]))   
-                else:
-                    something_y.append(([box_total,x,y]))
 
     for y in range(int(height/4), height-16):  # ignoring the first chunk of text
         for x in range(width-16):
@@ -201,41 +188,65 @@ def grade(form, output_im, output_file):
                         filled_x.append(([box_total,x,y]))   
                 else:
                     filled_x.append(([box_total,x,y]))
-            elif box_total >= something:
-                if len(something_x) > 0:
-                    if y-8 < something_x[-1][2] and x-8 < something_x[-1][1]:
-                        something_x.append(([box_total,x,y]))
-                        if box_total > something_x[-1][0]:
-                            something_x[-1] = [box_total,x,y]
-                    else:
-                        something_x.append(([box_total,x,y]))   
-                else:
-                    something_x.append(([box_total,x,y]))
-                
+
+    # will check the x list and the y list, and it appears in both, I use it.
     combined_filled = []
     for each in filled_x:
         if each in filled_y:
             combined_filled.append(each)
+    combined_filled = sorted(combined_filled, key=itemgetter(0,1), reverse = True)
 
+    # get out overlaps, by taking the brightest one
+    # i = 0
+    sublist = []
+    while len(combined_filled) > 0:
+        each = combined_filled.pop(0)
+        sublist_points = sorted([ point for point in combined_filled if (each[1]+16 > point[1] and each[2]+16 > point[2] and each[1]-16 < point[1] and each[2]-16 < point[2])] + [each], key=itemgetter(0), reverse=True)
+        if sublist_points[0] not in sublist:
+            sublist.append(sublist_points.pop(0))
+            if len(sublist_points) > 0:
+                for point in sublist_points:
+                    if point in combined_filled:
+                        combined_filled.remove(point)
 
-    combined_something = []
-    # for each in something_x:
-    #     if each in something_y:
-    #         combined_something.append(each)
+    sublist = sorted(sublist, key=itemgetter(2,1))
 
-    print(len(combined_filled))
-    print(len(filled_x), len(filled_y))
-    print(len(combined_something))
-    print(len(something_x), len(something_y))                
+    # determine which box the squares are in
+    def box_check_total(point,multiple,px):
+        x,y = point[1:3]
+        x_spacer = 58 / 2
+        last_space = 20
+        box_total = sum([1 for i in range_16 for j in range_16 if px[x+i+x_spacer*multiple+last_space,y+j] == 255])
+        return box_total
 
+    # look for numbers of scratch marks written in margin as false positives
+    finalist = []
+    letters = [[0,"E"], [1, "D"], [2,"C"], [3,"B"], [4,"A"]]
+    x_spacer = 58 / 2
+    for j in range(len(sublist)):
+        for i, letter in letters:
+            if box_check_total(sublist[j],i,px3) == 0:
+                if box_check_total(sublist[j],i-7,px3) != 0:
+                    finalist.append(sublist[j]+[letter,"X"])
+                else:
+                    finalist.append(sublist[j]+[letter,""])
+                break
 
-    for each in combined_filled:
+    print(len(finalist))
+
+    # temporary output
+    for each in finalist:
         for x in range_16:
             for y in range_16:
                 px3[each[1]+x,each[2]+y] = 128
+        if each[4] == "X":
+            for x in range(8):
+                for y in range(8):
+                    px3[each[1]+x,each[2]+y] = 192
+
             
     # Final output image
-    im3.save(form[0:4]+output_im)
+    im3.save(output_im)
 
     print("Hooray! "+form + " was successfully graded.")
     print("Output files '"+output_file+"' and '"+output_im+"' succcessfuly graded.")
