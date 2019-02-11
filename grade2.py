@@ -226,7 +226,7 @@ def grade(form, output_im, output_file):
         for i, letter in letters:
             if box_check_total(sublist[j],i,px3) == 0:
                 if box_check_total(sublist[j],i-7,px3) >= 10:
-                    finalist.append(sublist[j]+[letter,"X"])
+                    finalist.append(sublist[j]+[letter,"x"])
                 else:
                     finalist.append(sublist[j]+[letter,""])
                 break
@@ -270,13 +270,18 @@ def grade(form, output_im, output_file):
     for each in finalist:
         if last_number != 0:
             if each[7] > last_number:
-                if x_cross == "x":
+                if x_crossed == "x":
                     output_txt.write(new_line+" x")
                 else:
                     output_txt.write(new_line)
-                new_line = 
-
-        pass
+                x_crossed = ""
+                if each[4] == "x":
+                    x_cross = "x"    
+                new_line = str(each[7])
+    if x_crossed == "x":
+        output_txt.write(new_line+" x")
+    else:
+        output_txt.write(new_line)
     output_txt.close
         
 
@@ -292,7 +297,7 @@ def grade(form, output_im, output_file):
         for x in range_16:
             for y in range_16:
                 px3[each[1]+x,each[2]+y] = 128
-        if each[4] == "X":
+        if each[4] == "x":
             for x in range(8):
                 for y in range(8):
                     px3[each[1]+x,each[2]+y] = 192
