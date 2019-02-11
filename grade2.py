@@ -264,9 +264,20 @@ def grade(form, output_im, output_file):
     print(finalist)
 
     last_number = 0
+    x_crossed = ""
+    new_line = ""
     output_txt= open(output_file,"w+")
     for each in finalist:
+        if last_number != 0:
+            if each[7] > last_number:
+                if x_cross == "x":
+                    output_txt.write(new_line+" x")
+                else:
+                    output_txt.write(new_line)
+                new_line = 
+
         pass
+    output_txt.close
         
 
     # for i in range(len(rows)):
