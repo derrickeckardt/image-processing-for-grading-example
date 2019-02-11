@@ -214,19 +214,18 @@ def grade(form, output_im, output_file):
     # determine which box the squares are in
     def box_check_total(point,multiple,px):
         x,y = point[1:3]
-        x_spacer = 58 / 2
-        last_space = 20
-        box_total = sum([1 for i in range_16 for j in range_16 if px[x+i+x_spacer*multiple+last_space,y+j] == 255])
+        x_spacer = 56 / 2
+        box_total = sum([1 for i in range_16 for j in range_16 if px[x+i+x_spacer*multiple,y+j] == 255])
         return box_total
 
     # look for numbers of scratch marks written in margin as false positives
     finalist = []
-    letters = [[0,"E"], [1, "D"], [2,"C"], [3,"B"], [4,"A"]]
-    x_spacer = 58 / 2
+    letters = [[1,"E"], [2, "D"], [3,"C"], [4,"B"], [5,"A"]]
+    x_spacer = 56 / 2
     for j in range(len(sublist)):
         for i, letter in letters:
             if box_check_total(sublist[j],i,px3) == 0:
-                if box_check_total(sublist[j],i-7,px3) != 0:
+                if box_check_total(sublist[j],i-7,px3) >= 10:
                     finalist.append(sublist[j]+[letter,"X"])
                 else:
                     finalist.append(sublist[j]+[letter,""])
