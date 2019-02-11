@@ -281,9 +281,9 @@ def grade(form, output_im, output_file):
             last_number += 1
         elif each[7] == last_number:
             new_line += each[3]
-        # else:
-        #     output_txt.write(str(last_number))
-        #     last_number += 1
+        else:
+            output_txt.write(str(last_number))
+            last_number += 1
             
             
 
