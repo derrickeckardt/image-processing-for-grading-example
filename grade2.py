@@ -232,6 +232,44 @@ def grade(form, output_im, output_file):
                 break
 
     print(len(finalist))
+    
+    #sort them to their questions, first find row number
+    finalist1 = sorted(finalist, key=itemgetter(2,1))*1
+    row_num = 0
+    while len(finalist1) > 0:
+        row_num += 1
+        each = finalist1.pop(0)
+        row_points = sorted([point+[row_num] for point in finalist1 if point[2] < each[2] + 16]+[each+[row_num]],key=itemgetter(1))
+        for rowp in row_points:
+            if rowp[0:-1] in finalist1:
+                finalist1.remove(rowp[:-1])
+            finalist[finalist.index(rowp[0:-1])].append(row_num)
+
+    # then sort them to find column number
+    finalist1 = sorted(finalist, key=itemgetter(3,1))*1
+    col_num = 0
+    while len(finalist1) > 0:
+        each = finalist1.pop(0)
+        col_points = sorted([point + [col_num] for point in finalist1 if point[1] < each[1] + 135]+[each+[col_num]],key=itemgetter(1))
+        for colp in col_points:
+            if colp[0:-1] in finalist1:
+                finalist1.remove(colp[0:-1])
+            finalist[finalist.index(colp[0:-1])].append(col_num)
+        col_num += 1
+
+    for i in range(len(finalist)):
+        finalist[i].append(finalist[i][5] + finalist[i][6]*29)
+
+    finalist = sorted(finalist, key=itemgetter(7,5))
+    print(finalist)
+
+
+    # for i in range(len(rows)):
+    #     row = rows.pop(0)
+    #     for j in range(len(row)):
+    #         final_dict[i+1] = {"value": point[3], "X" : point[4]}
+            
+        
 
     # temporary output
     for each in finalist:
