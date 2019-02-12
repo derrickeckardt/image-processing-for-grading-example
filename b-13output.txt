@@ -3,7 +3,7 @@
 3 B
 4 B
 5 C
-6 AD
+6 AD x
 7 D
 8 B
 9 B

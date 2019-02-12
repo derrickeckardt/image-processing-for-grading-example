@@ -25,15 +25,8 @@ import sys
 import PIL
 import cProfile
 from PIL import Image, ImageFilter
-from collections import Counter
-from pprint import pprint
-import numpy as np
-from timeit import timeit
 import math
 from operator import itemgetter
-import profile
-import cProfile
-
 
 def add_edges_dict(px,filter_matrix, width, height):
     im_width = width
@@ -300,6 +293,9 @@ def grade(form, output_im, output_file):
             last_number += 1
         elif each[7] == last_number:
             new_line += each[3]
+            if each[4] == "x":
+                x_crossed = "x"    
+
             
     if x_crossed == "x":
         output_txt.write(new_line+" x"+"\n")
