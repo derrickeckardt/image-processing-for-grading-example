@@ -150,7 +150,7 @@ def grade(form, output_im, output_file):
     # using a threshold of at least 40% are filled in
     # and then by location, to determine the location of them, and if there is
     #something to left of the number
-    filled = int(16 * 16 * 0.31)
+    filled = int(16 * 16 * 0.29)
     filled_x = []
     filled_y = []
 

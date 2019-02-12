@@ -44,7 +44,7 @@
 44 AC
 45 DE
 46 CE
-47 ABD
+47 AD
 48 CE
 49 DE
 50 CE
@@ -72,7 +72,7 @@
 72 D
 73 BE x
 74 AB x
-75 ABC x
+75 AC x
 76 AC x
 77 AB x
 78 B
