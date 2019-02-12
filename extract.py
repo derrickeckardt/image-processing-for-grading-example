@@ -27,48 +27,54 @@ from PIL import Image, ImageFilter
 from pprint import pprint
 from timeit import timeit
 import math
+from collections import Counter
 from random import choice
 from operator import itemgetter
 
-def get_barcode(px, width):
+def decode_barcode(px, width):
     # assuming relatively the same placement starting to the left of where the 
     # middle should be
-    x, y = 50,450
+    
+    #I take it in five difference places so that I can vote, to help reduce
+    # the impact of noise
+    x, y_range = 50, range(430,480,10)
 
     front_spacer = 3
     rear_spacer = 2
     bar_width = 3
 
-    #find front pixels
-    for i in range(x,width-x):
-        probe_total = sum([1 for z in range(i,i+front_spacer*bar_width) if px[z,y] < 255])
-        if probe_total == front_spacer*bar_width:
-            break
-    front = i
-
-    #find read pixels
-    for i in range(width-x-1,-1,-1):
-        probe_total = sum([1 for z in range(i,i-rear_spacer*bar_width,-1) if px[z,y] < 255])
-        if probe_total == rear_spacer*bar_width:
-            break
-        pass
-    back = i +1
-
     barcode = {}
-    counter = 1
-    for z in range(front+front_spacer*bar_width,back-rear_spacer*bar_width, bar_width):
-        barcode[counter] = sum([px[z+i,y] for i in range(bar_width)])
-        counter += 1
-    pprint(barcode)
+    for y in y_range:
+        barcode[y] = {}
+        #find front pixels
+        for i in range(x,width-x):
+            probe_total = sum([1 for z in range(i,i+front_spacer*bar_width) if px[z,y] < 255])
+            if probe_total == front_spacer*bar_width:
+                break
+        front = i
+        #find rear pixels
+        for i in range(width-x-1,-1,-1):
+            probe_total = sum([1 for z in range(i,i-rear_spacer*bar_width,-1) if px[z,y] < 255])
+            if probe_total == rear_spacer*bar_width:
+                break
+            pass
+        back = i +1
+    
+        counter = 1
+        for z in range(front+front_spacer*bar_width,back-rear_spacer*bar_width, bar_width):
+            barcode[y][counter] = sum([px[z+i,y] for i in range(bar_width)])
+            counter += 1
 
-    return barcode
-    
-def decode(barcode):
-    
     answers = {}
-    for i in range(1,len(barcode)+1,5):
-        answers[i] = barcode[i]
-                
+    for i in range(1,426,5):
+        answers[int(i/5)+1] = {}
+        for j, letter in zip(range(5),'ABCDE'):
+            votes = []
+            for y in y_range:
+                votes.append(barcode[y][i+j])
+            result = Counter(votes)
+            answers[int(i/5)+1][letter] = True if result.most_common(1)[0][0] <= 255*2 else False
+    
     return answers
 
 def ref_points(px,width,height,location):
@@ -96,11 +102,15 @@ def stark_difference(px_load, width, height):
         for y in range(height):
             px_load[x,y] = 0 if px_load[x,y] < 160 else 255
 
+def scale(rp1,rp2,cp1,cp2):
+    area_cp = (cp2[1] - cp1[1])  * (cp2[0] - cp1[0])
+    area_rp = (rp2[1] - rp1[1])  * (rp2[0] - rp1[0])
+    return (area_cp / area_rp)**0.5
+
 def extract(injected_im, output_txt):
     # import injected form
     im = Image.open(injected_im).convert('L')
     px = im.load()
-    im.save("bw-"+injected_im)
     width, height = im.width, im.height
 
     # ensure form hasn't rotate, if it has, rotate it.  New reference points
@@ -110,21 +120,44 @@ def extract(injected_im, output_txt):
     # find reference points on original
     cp1 = (0,0)
     cp2 = ref_points(px,width,height,0)
-    print(cp1,cp2)
+
+    # assumption to note, these are assuming that the scan is at 100%.
+    # I found that the scans were mostly all 96% of the given size, so image
+    # will have to be scaled up in order to be the correct size
+
+    # untested, lack of testing materials
+    # scale_ratio = scale(rp1,rp2,cp1,cp2)
+
+    # imshrink = im.resize((1632,2112), box=(34,44,1666,2156))
+    # imshrink.save("imshrink.jpg")
+
+    # x_scale_marg = int(width * (1.0-scale_ratio) / 2)
+    # y_scale_marg = int(height * (1.0-scale_ratio) / 2)
+
+    # # zooms into the relevant portion
+    # im1 = im.resize((width,height),box=(x_scale_marg,y_scale_marg,width - x_scale_marg,height - y_scale_marg))
+    # im1.save('rescaled.jpg')
 
     # finally, rotate the image
     angle_to_rotate = rotate_angle(rp1,rp2,cp1,cp2)
     im2 = im.rotate(angle_to_rotate)
     px2 = im2.load()
 
+    
     # filter out any noise introduced reimporting it.
     stark_difference(px2,width,height)
 
-    # get barcode
-    barcode = get_barcode(px2, width)
-
-    # import answers
-    answers = decode(barcode)
+    # get barcode and decode it
+    answers = decode_barcode(px2, width)
+    
+    output_file= open("test-"+output_txt,"w+")
+    for i in range(1,86):
+        new_line = str(i)+" "
+        for letter in 'ABCDE':
+            if answers[i][letter] == True:
+                new_line += letter
+        output_file.write(new_line+"\n")
+    output_file.close
 
     print("Answers successfully extracted from '"+injected_im+"' and outputted into '"+output_txt+"'. Happy Grading!")
     
