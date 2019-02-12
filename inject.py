@@ -41,7 +41,6 @@ def get_answers(answers_file):
                     answers[question][option] = True
                 else:
                     answers[question][option] = False
-
     return answers
 
 def print_barcode(answers,px):
@@ -50,22 +49,43 @@ def print_barcode(answers,px):
     color_options = [(255,0,0),(0,255,0),(0,0,255)] # rgb
     
     #starting position
-    x, y = 175,350
-
+    x, y = 100,350
     white = (255,255,255)
     options = list('ABCDE')
+    bar_width = 3
+
+    # Add leading element so we know barcode begins
+    # this spacer tells it to ignore the first 5 symbols it picks up.
+    # unless you know this, the answers will not make sense
+    # for each test, this could be unique
+    front_spacer = 3 
+    for space in range(front_spacer):
+        color = choice(color_options)
+        for i in range(bar_width):
+            for j in range(200):
+                px[x+i,y+j] = color
+        x += bar_width
+    
+    # encode answers
     for question in range(1,len(answers)+1):
         color = choice(color_options)
         for letter in options:
-            for i in range(3):
+            for i in range(bar_width):
                 for j in range(200):
                     if answers[question][letter] == True:  
-                        # print("color")
                         px[x+i,y+j] = color
                     else:
-                        # print("white")
                         px[x+i,y+j] = white
-            x += 3
+            x += bar_width
+
+    # end bar, similarily this could be unique
+    rear_spacer = 2 
+    for space in range(rear_spacer):
+        color = choice(color_options)
+        for i in range(bar_width):
+            for j in range(200):
+                px[x+i,y+j] = color
+        x += bar_width
 
 def inject(form, answers_file, injected_im):
     # import answers
@@ -82,8 +102,8 @@ def inject(form, answers_file, injected_im):
     #output file
     im.save(injected_im)
     
-    im2 = Image.open(injected_im).convert('L')
-    im2.save("bw-"+injected_im)
+    print("Barcode successfully injected into '"+injected_im+"'.  Happy Test Taking!")
+
     
 ################################################################################
 # Run program
