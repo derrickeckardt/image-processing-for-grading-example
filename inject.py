@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 #   ./inject.py : Injecting encoded answers onto a blank answer sheet:
-#     ./grade.py form.jpg output.jpg output.txt 
+#     ./inject.py form.jpg answers.txt injected.jpg
 # 
 ################################################################################
 # CS B657 Spring 2019, Assignment #1 - Image Processing and Recognition Basics
@@ -24,9 +24,74 @@ import sys
 import PIL
 import cProfile
 from PIL import Image, ImageFilter
-from collections import Counter
 from pprint import pprint
-import numpy as np
 from timeit import timeit
 import math
+from random import choice
 from operator import itemgetter
+
+def get_answers(answers_file):
+    answers = {}
+    with open(answers_file, 'r') as file:
+        for line in file:
+            question, truth = int(line.split()[0]), line.split()[1]
+            answers[question] = {}
+            for option in 'ABCDE':
+                if option in truth:
+                    answers[question][option] = True
+                else:
+                    answers[question][option] = False
+
+    return answers
+
+def print_barcode(answers,px):
+    # Will print a muti-colored barcode with each answer.  added color to imply
+    # meaning, no actual meaning, just to throw students off
+    color_options = [(255,0,0),(0,255,0),(0,0,255)] # rgb
+    
+    #starting position
+    x, y = 175,350
+
+    white = (255,255,255)
+    options = list('ABCDE')
+    for question in range(1,len(answers)+1):
+        color = choice(color_options)
+        for letter in options:
+            for i in range(3):
+                for j in range(200):
+                    if answers[question][letter] == True:  
+                        # print("color")
+                        px[x+i,y+j] = color
+                    else:
+                        # print("white")
+                        px[x+i,y+j] = white
+            x += 3
+
+def inject(form, answers_file, injected_im):
+    # import answers
+    answers = get_answers(answers_file)
+    
+    # import form
+    im = Image.open(form).convert('RGB')
+    px = im.load()
+    width, height = im.width, im.height
+
+    # print barcode
+    print_barcode(answers,px)
+    
+    #output file
+    im.save(injected_im)
+    
+    im2 = Image.open(injected_im).convert('L')
+    im2.save("bw-"+injected_im)
+    
+################################################################################
+# Run program
+################################################################################
+
+# Load command line inputs
+form, answers_file, injected_im = sys.argv[1:]
+
+# Inject form
+# cProfile.run("inject(form, answers_file, injected_im)")
+inject(form, answers_file, injected_im)
