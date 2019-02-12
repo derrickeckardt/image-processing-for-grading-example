@@ -39,7 +39,6 @@ def get_barcode(px, width):
     rear_spacer = 2
     bar_width = 3
 
-    barcode = []
     #find front pixels
     for i in range(x,width-x):
         probe_total = sum([1 for z in range(i,i+front_spacer*bar_width) if px[z,y] < 255])
@@ -51,15 +50,25 @@ def get_barcode(px, width):
     for i in range(width-x-1,-1,-1):
         probe_total = sum([1 for z in range(i,i-rear_spacer*bar_width,-1) if px[z,y] < 255])
         if probe_total == rear_spacer*bar_width:
-            print(i)
             break
         pass
-        
+    back = i +1
+
+    barcode = {}
+    counter = 1
+    for z in range(front+front_spacer*bar_width,back-rear_spacer*bar_width, bar_width):
+        barcode[counter] = sum([px[z+i,y] for i in range(bar_width)])
+        counter += 1
+    pprint(barcode)
 
     return barcode
     
 def decode(barcode):
+    
     answers = {}
+    for i in range(1,len(barcode)+1,5):
+        answers[i] = barcode[i]
+                
     return answers
 
 def ref_points(px,width,height,location):
