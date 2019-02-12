@@ -78,23 +78,43 @@ One thing I noticed is that the completed answer sheets often were slightly aske
 ## Analysis - General Approach
 Early on, we learned about the filters that are used for facial recognition.  They are very basic filters that went pixel by pixel looking for regions in images that different than other regions, such as darker near eyes than the surrounding area, it might be indicative of a face.  With multiple of those simple filters lopped on, it can find faces with surprising high accuracy.  Similarily, I thought such a filter would work well here, that if a box, the size of the bubble box had enough pixels completed, it was likely something of note.  Since all of the pixels had gone through the filtering, only the strongest of pixels remained.  Even, much of the bubble boxes got filtered away, so they did not create much noise.
 
-So, I created a 16x16 filter box (remember,I scaled it down 50% in each axis) that counted pixels.  If 29% of the pixels were colored in, I said it was interesting.  First, my box went horizontally across, one pixel at a time and then vertically down.  Then, I did it vertically down and then horizontally across.  I also had it take the local best since adjacent pixels would likely have similar values.  In each case, for a sample case, I got around 2500 vertically and then 2500 horizontally.  Then, I found the intersection of the two, which got me to about 300 points. With each sheet scoring
+### Filters are Simple and Work
+So, I created a 16x16 filter box (remember,I scaled it down 50% in each axis) that counted pixels.  If 29% of the pixels were colored in, I said it was interesting.  First, my box went horizontally across, one pixel at a time and then vertically down.  Then, I did it vertically down and then horizontally across.  I also had it take the local best (within 8 pixels) since adjacent pixels would likely have similar values.  In each case, for a sample case, I got around 2500 vertically and then 2500 horizontally.  Then, I found the intersection of the two, which got me to about 300 points. With each sheet having about 110 bubbles completed, I was close, but not close enough. I then, once again had the points filtered to find points that overlapped.  Prior, I had only filtered out repeats within 8 pixels to err on the side of conservatism.  This approach worked out well, as I now had the appropriate amount of datapoints.
 
-### What is the Student's intent
+### What's an adequate threshold?
+How did I get 29%?  That was through trial and error.  I created groundtruth files for all of the images.  I calculated which values for the threshold produced what kind of errors and how many total errors.  I used it to troubleshoot and fix some of those errors.  I found at a threshold between 29% and 30%, as many errors as possible were minimized.  I went with 29% since at 31% some errors were caused by students filling it in too lightly.  At lower than 28%, the blank boxes themselves started to show up, particularly the Bs, because Bs already have a lot of pixels.  This number is definitely tuned, and I got different errors on different sheets dependings on threshold.
+
+### Using White Space to Find the Letters
+After getting my final set of points, I used the distance to the white space on the right as a relative guide to determine if points represented A, B, C, D, or E.  Then, with a similar method, I looked for any sort of markups on the space of the left to indicate something of note might be there for an instructor to see.
+
+### More sorting
+Now, I had all of points assigned to letters and they carried with the information that might be something in the margin.  But, I didn't know to which question they belonged to.  In order to determine the locations of the points, I first sorted them vertically and assigned them to a row, and then horizontally and assigned them to a column.  I used the known width of a row and column to aid in the sorting process.  Once, I had the row and column, I calculated the question number.
+
+Finally, with the question numbers, letter, and margin markings, I was able to create the output.txt file.
+
+Creating the output.img file was straight forward, as I draw a box, with my known points representing the upper corner.  I was also able to draw boxes around the white space where things had been marked.
+
+### (Not) Understanding the Student's Intent
 This question came up when looking at test image A48, Question 64, letter A, and on C33, Question 82, letter A.  The first one (A48) the box is filled in about one-third.  The second one (C33) it appears the pen might have been pushed down on the box, and either erased or not completely filled.  Other boxes in the area show that the student tended to have really strong pen marks, indicating where they began coloring in the box.  Or, did I imagine it in both these cases.  THis is the challenge for computer vision, we're trying to ask a machine to interrupt what might not be straight forward for a human to determine. I tended to favor, if there is a mark, then it counts, since I cannot begin to guess someone's intent.
 
 ## Results
-Amazingly to my own surprise, my program was able to correctly identify 675 of 680 questions for a 99.3% accuracy.  The errant solutions were a result of probably noise, or perhaps residue from eraser marks that was dark enough to show up on the image.
+Amazingly to my own surprise, my program was able to correctly identify 675 of 680 questions for a 99.3% accuracy.  The errant solutions were a result of probably noise, or perhaps residue from eraser marks that was dark enough to show up on the image.  Overall, I am happy with the results, but there are many
 
 ## Recommendations for Improvement of Grade.py
 
 ### Recognize the Oddities
 The most amazing thing about business is that when you give someone a product, they will find ways to use it that you could never have imagined or anticipated.  The best improvement for this is program would be for it to identify when a student does something that is non-standard.  Perhaps they doodled in the margin, or wrote an extensive note to the instructor on it.  SOmething like that will likely break the best of systems unless they are anticipated for.  And even then, it still mgiht break.  Perhaps a neural network that focuses on everything outside of the boxes, while we only were really focused on the boxes and the spaces just outside of them, might be able to flag for instructors that a particular sheet should be looked at.
 
+### Voting method
+To get the absolute best results, multiple techniques should be deployed, and then using a system vote to determing which are the final answers, or at a minimum, to flag the ones that a human might need to check out for the final word.  Now that the instructors have 50 different approaches, they could take the ten best, and see what a consolidated result looks like.
+
+### Refactoring the Code
+This code takes less than one minute to run scoresheet.  I think with a better data structure, and more efficiently looping, incorporation of dyanmic programming, and other techniques, it could run much faster.  A faster running program allows fewer resources to be used and/or multiple techniques to be tried during a 'reasonable' amount of time.
+
 ### Adding a line to the instructions
 With that previous point and the earlier discussion about student intent, the instructions should be updated to indicate that "any marks" might result in incorrect grading, so students should be careful with their pens.  I might go as far as banning erasing, and requiring the notes in the margin, since those can be picked up fairly easily.
 
-
+# Inject.py
 
 
 
