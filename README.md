@@ -1,6 +1,10 @@
-# a1
+# CS B657 - Assignment 1
 
-# Grading program
+Completed by Derrick Eckardt on February 12, 2019.  Please direct any questions to [derrick@iu.edu](mailto:derrick@iu.edu)
+
+The assignment prompt can be found at [Assignment 1 Prompt](https://github.iu.edu/cs-b657-sp2019/derrick-a1/blob/master/a1.pdf)
+
+# Grading program - grade.py
 
 ## Importing the image
 When key decision I made was to important the image as grayscale.
