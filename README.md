@@ -114,9 +114,23 @@ This code takes less than one minute to run scoresheet.  I think with a better d
 ### Adding a line to the instructions
 With that previous point and the earlier discussion about student intent, the instructions should be updated to indicate that "any marks" might result in incorrect grading, so students should be careful with their pens.  I might go as far as banning erasing, and requiring the notes in the margin, since those can be picked up fairly easily.
 
-# Inject.py
+# Answer Injecting - Inject.py - The Problem
+
+## Results
+
+## Recommendations
 
 
+# Answer Extracting - Extract.py - The Problem
+
+## Results
+
+## Recommendations
+
+### Potential Scanning Issues
+The biggest concern I have is that the extracting  is dependent on the document being printed and scanned at the same exact size as when the barcode was injected.  If an image is scanned or printed at 96% of its actual size, that casues the interior of the document to be 68 pixels short.  How is that handled?
+
+I attempted to account for that, but as I mentioned earlier, you never know how things like that can be distorted and can make it just not possible for the bar code to function.
 
 
 
