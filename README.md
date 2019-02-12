@@ -1,4 +1,4 @@
-# CS B657 - Assignment 1
+# CS B657 - Assignment 1: Image Processing and Recognition Basics
 
 Completed by Derrick Eckardt on February 12, 2019.  Please direct any questions to [derrick@iu.edu](mailto:derrick@iu.edu)
 
@@ -6,17 +6,21 @@ The assignment prompt can be found at [Assignment 1 Prompt](https://github.iu.ed
 
 # Grading program - grade.py
 
+## The Problem
+First, the problem is presented with a answer sheet for a test.  It's a typical looking bubblesheet, with 85 questions.  The goal is to write a program that can read the answers filled out the by the student, determine if they put relevant markings in the margins, and then output this into two documents.  The first one is a text file that gives the letters and markings for each question, in a format specified in the prompt.  The second document is a copy of the student's completed answer sheet that has been annotated with the answers and margin markings the grade.py program found.
+
 ## Importing the image
-When key decision I made was to important the image as grayscale.
+To begin, a key decision I made was to important the image as grayscale.  This makes the numbers easier to work with, and later makes it easier to highlight.  I tried early on with RGB color, but that created issues in determing the important of what was in a pixel that weren't worth the hassle.
 
 ## Resizing the image.
-The images were 1700 x 2200 pixels.  Those are fairly large.  So, I played around with some reduced images sizes that I felt did not lose fidelity.  The benefit is that a smaller image would be computationally less intensive.  By reducing length and width by 50% each, makes my image only a fourth as large.  Higher values might be possible.
-
-As a check, i did run itat 100% and got the same results.
-# FIX ME LATER
+The images were 1700 x 2200 pixels.  Those are fairly large to look at pixel by pixel.  So, I played around with some reduced images sizes that I felt did not lose fidelity.  The benefit is that a smaller image would be computationally less intensive.  By reducing length and width by 50% each, makes my image only a fourth as large, and four times faster to evaluate.  THere is probably some ideal value that might be lower that allows for even faster processing, but it was not worth the time to optimize that further for diminishing returns, since I had already cut processing time down 75% by using a 50% reduction.
 
 ## Filtering the images
-At the beginning, I decided to look at the intensities of the ink, and on the sample images, I found that almost all the pixels were within 20 of either 0 or 255 intensity-level, indicating that the pixels were all basically white or black.  For example, here is the distribution of intensities for test images a3.jpg:
+Since the images had first been printed, and then scanned, there was some noise that was created as a result of two machines and several humans touching the documents.  To handle that I took two approaches.
+
+### Box Filtering the Images
+
+Next, I took a look at the intensities of the ink, and on the sample images, I found that almost all the pixels were within 40 of either 0 or 255 intensity-level, indicating that the pixels were all basically white or black.  For example, here is the distribution of intensities for test images a3.jpg:
 
 ```
 {0: 125972,
@@ -60,4 +64,31 @@ At the beginning, I decided to look at the intensities of the ink, and on the sa
  255: 3225406}
  ```
 
-Because of that, I ran a quick filter to change them all to 0 or 255, where I split them at 128.  This could potentially introduce some error for someone who did not fill them in very full.  Even for test-image a-48, which had some very light markings, splitting down the middle was still a good measure.
+Because of that, I ran a quick filter to change them all to 0 or 255, where I split them at 160.  This could potentially introduce some error for someone who did not fill them in very full.  Even for test-image a-48, which had some very light markings, splitting down the middle was still a good measure.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
