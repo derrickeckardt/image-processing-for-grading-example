@@ -53,6 +53,7 @@ def print_barcode(answers,px):
     white = (255,255,255)
     options = list('ABCDE')
     bar_width = 3
+    color = (0,0,0)
 
     # Add leading element so we know barcode begins
     # this spacer tells it to ignore the first 5 symbols it picks up.
@@ -60,7 +61,7 @@ def print_barcode(answers,px):
     # for each test, this could be unique
     front_spacer = 3 
     for space in range(front_spacer):
-        color = choice(color_options)
+        # color = choice(color_options)
         for i in range(bar_width):
             for j in range(200):
                 px[x+i,y+j] = color
@@ -68,7 +69,7 @@ def print_barcode(answers,px):
     
     # encode answers
     for question in range(1,len(answers)+1):
-        color = choice(color_options)
+        # color = choice(color_options)
         for letter in options:
             for i in range(bar_width):
                 for j in range(200):
@@ -81,7 +82,7 @@ def print_barcode(answers,px):
     # end bar, similarily this could be unique
     rear_spacer = 2 
     for space in range(rear_spacer):
-        color = choice(color_options)
+        # color = choice(color_options)
         for i in range(bar_width):
             for j in range(200):
                 px[x+i,y+j] = color

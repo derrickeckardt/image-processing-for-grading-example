@@ -39,61 +39,28 @@ def get_barcode(px, width):
     rear_spacer = 2
     bar_width = 3
 
-    for i in range(width-x):
+    barcode = []
+    #find front pixels
+    for i in range(x,width-x):
+        probe_total = sum([1 for z in range(i,i+front_spacer*bar_width) if px[z,y] < 255])
+        if probe_total == front_spacer*bar_width:
+            break
+    front = i
+
+    #find read pixels
+    for i in range(width-x-1,-1,-1):
+        probe_total = sum([1 for z in range(i,i-rear_spacer*bar_width,-1) if px[z,y] < 255])
+        if probe_total == rear_spacer*bar_width:
+            print(i)
+            break
+        pass
         
 
-    barcode = []
     return barcode
     
 def decode(barcode):
     answers = {}
     return answers
-
-def print_barcode(answers,px):
-    # Will print a muti-colored barcode with each answer.  added color to imply
-    # meaning, no actual meaning, just to throw students off
-    color_options = [(255,0,0),(0,255,0),(0,0,255)] # rgb
-    
-    #starting position
-    x, y = 100,350
-    white = (255,255,255)
-    options = list('ABCDE')
-    bar_width = 3
-
-    # Add leading element so we know barcode begins
-    # this spacer tells it to ignore the first 5 symbols it picks up.
-    # unless you know this, the answers will not make sense
-    # for each test, this could be unique
-    spacer = 3 
-    for space in range(spacer):
-        color = choice(color_options)
-        for i in range(bar_width):
-            for j in range(200):
-                px[x+i,y+j] = color
-        x += bar_width
-    
-    # encode answers
-    for question in range(1,len(answers)+1):
-        color = choice(color_options)
-        for letter in options:
-            for i in range(bar_width):
-                for j in range(200):
-                    if answers[question][letter] == True:  
-                        px[x+i,y+j] = color
-                    else:
-                        px[x+i,y+j] = white
-            x += bar_width
-
-    # end bar, similarily this could be unique
-    spacer = 2 
-    for space in range(spacer):
-        color = choice(color_options)
-        for i in range(bar_width):
-            for j in range(200):
-                px[x+i,y+j] = color
-        x += bar_width
-        
-    print(x)
 
 def ref_points(px,width,height,location):
     # find the location of reference points
@@ -115,10 +82,16 @@ def rotate_angle(rp1,rp2,cp1,cp2):
     cp_ang = math.degrees(math.atan((cp2[1] - cp1[1])/(cp2[0] - cp1[0])))
     return rp_ang-cp_ang
 
+def stark_difference(px_load, width, height):
+    for x in range(width):
+        for y in range(height):
+            px_load[x,y] = 0 if px_load[x,y] < 160 else 255
+
 def extract(injected_im, output_txt):
     # import injected form
     im = Image.open(injected_im).convert('L')
     px = im.load()
+    im.save("bw-"+injected_im)
     width, height = im.width, im.height
 
     # ensure form hasn't rotate, if it has, rotate it.  New reference points
@@ -134,6 +107,9 @@ def extract(injected_im, output_txt):
     angle_to_rotate = rotate_angle(rp1,rp2,cp1,cp2)
     im2 = im.rotate(angle_to_rotate)
     px2 = im2.load()
+
+    # filter out any noise introduced reimporting it.
+    stark_difference(px2,width,height)
 
     # get barcode
     barcode = get_barcode(px2, width)
