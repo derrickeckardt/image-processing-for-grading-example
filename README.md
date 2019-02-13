@@ -152,8 +152,5 @@ Here are some thoughts I had on how to make this better.
 ### Why Are We Overcomplicating it?
 Rather than encoding the answers and then extracting them, which could introduce for the reasons I've pointed out, why not just print, in large, noise-absorbing letter a 6-digit serial number.  Since as we learned that OCR is well developed for things like digits and letters, this would be rather straightforward (and something we did last semester in B551).  Then, the serial number would correspond to the answer set, which would reside on the instructor's computer.  That answer set would have already been generated when the student's test was generated.  This way we make it really easy to outmate the answer key for a particular test, but we don't have to worry about things like noise and scale reductions caused by scanning and printing.
 
-### Better algorith
+### Better algorithm
 Rather than dealing with absolute values, I would come up with something that crawled my bar code, looking for differences, and if things shrank or were widened, it wouldn't matter, because only the differences would matter.  Overall, not really happy with how it came out, there is definitely room for improvement on the injecting algorithm in order to facilitate better extraction.
-
-### Find Better Way to Deal with Scale
-Overall, I was very unhappy with the methods that I came up with the variablity in scale that would likely happy.
