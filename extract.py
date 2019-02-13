@@ -31,7 +31,49 @@ from collections import Counter
 from random import choice
 from operator import itemgetter
 
+def decode_barcode2(px, width, scale_ratio):
+    # finding opening black bar, up - corner
+    x, y = 50,400  # starting with 400 to give some margin
+    for i in range(x,width-x):
+        probe_total = sum([1 for z in range(i,i+5) if px[z,y] == 0])
+        if probe_total == 5:
+            x = i
+            break
+
+    for j in range(y,y-100,-1):
+        probe_total = sum([1 for z in range(j-5,j) if px[x,z] == 255])
+        if probe_total == 5:
+            y = j
+            break
+    
+    # since we found the scale of the document earlier, can adjust expectations
+    # for where things should be
+    bar_width = round(15*scale_ratio)
+    x += round(20*scale_ratio)
+    
+    # then move x,y squarely into the estimated middle of the first box under Question 1
+    x += bar_width + int(bar_width/2)
+    y += bar_width + int(bar_width/2)
+    y_i = y
+
+    encryption = '0132043412033042104211120231443244131113302332044423434220110201202323332414230320444'
+    letters = {'0':'ABCDE', '1':'BCDEA', '2': 'CDEAB', '3': 'DEABC', '4':'EABCD'}
+    header_color = 1
+    answers = {}
+    for k, shift in zip(range(1,86), encryption):
+        answers[k] = {}
+        for letter in letters[shift]:
+            subtotal = sum([1 for i in range(-1,2,1) for j in range(-1,2,1) if px[x+i,y+i] == 0])     
+            answers[k][letter] = True if subtotal >= 5 else False
+            y += bar_width
+        x += bar_width
+        y = y_i
+
+    return answers
+    
 def decode_barcode(px, width):
+    # not used, replaced with other one.
+    
     # assuming relatively the same placement starting to the left of where the 
     # middle should be
     
@@ -91,7 +133,7 @@ def ref_points(px,width,height,location):
         if column_total > 5:
             break
     return z,y
-
+    
 def rotate_angle(rp1,rp2,cp1,cp2):
     rp_ang = math.degrees(math.atan((rp2[1] - rp1[1])/(rp2[0] - rp1[0])))
     cp_ang = math.degrees(math.atan((cp2[1] - cp1[1])/(cp2[0] - cp1[0])))
@@ -126,8 +168,7 @@ def extract(injected_im, output_txt):
     # will have to be scaled up in order to be the correct size
 
     # untested, lack of testing materials
-    # scale_ratio = scale(rp1,rp2,cp1,cp2)
-
+    
     # imshrink = im.resize((1632,2112), box=(34,44,1666,2156))
     # imshrink.save("imshrink.jpg")
 
@@ -143,14 +184,15 @@ def extract(injected_im, output_txt):
     im2 = im.rotate(angle_to_rotate)
     px2 = im2.load()
 
-    
     # filter out any noise introduced reimporting it.
     stark_difference(px2,width,height)
 
-    # get barcode and decode it
-    answers = decode_barcode(px2, width)
+    # get barcode and decode it, and pass the scale of the answer area, in case 
+    # scanning has impacted it.
+    # scale_ratio = scale(rp1,rp2,cp1,cp2)
+    answers = decode_barcode(px2, width)#, scale_ratio)
     
-    output_file= open("test-"+output_txt,"w+")
+    output_file= open(output_txt,"w+")
     for i in range(1,86):
         new_line = str(i)+" "
         for letter in 'ABCDE':

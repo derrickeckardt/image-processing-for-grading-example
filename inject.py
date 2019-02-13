@@ -43,6 +43,42 @@ def get_answers(answers_file):
                     answers[question][option] = False
     return answers
 
+def print_barcode2(answers,px):
+    #starting position
+    x, y = 100,350
+    white = 255
+    bar_width = 15
+    color = 0
+
+    # for finding later in extract
+    for i in range(-20,-10):
+        for j in range(100):
+            px[x+i,y+j] = color
+
+
+    # encrypts by shifting the answers anywhere between 0 and 4 places to the right (eg, 1 would mean A goes B, B to C etc)
+    encryption = '0132043412033042104211120231443244131113302332044423434220110201202323332414230320444'
+    letters = {'0':'ABCDE', '1':'BCDEA', '2': 'CDEAB', '3': 'DEABC', '4':'EABCD'}
+
+    header_color = 1
+    # outputs header bar that can be used for positioning, and recognizing when a new
+    # question begins, and should make it immune to most scaling issues
+
+    for question, shift in zip(range(1,len(answers)+1), encryption):
+        y = 350
+        for i in range(bar_width):
+            for j in range(bar_width):
+                px[x+i,y+j] = color if header_color == 1 else white
+        header_color = header_color * -1
+        y=350 + bar_width
+        
+        for letter in letters[shift]:
+            for i in range(bar_width):
+                for j in range(bar_width):
+                    px[x+i,y+j] = color if answers[question][letter] == True else white
+            y += bar_width
+        x += bar_width
+        
 def print_barcode(answers,px):
     # Will print a muti-colored barcode with each answer.  added color to imply
     # meaning, no actual meaning, just to throw students off
@@ -94,6 +130,7 @@ def inject(form, answers_file, injected_im):
     
     # import form
     im = Image.open(form).convert('RGB')
+    # im = Image.open(form).convert('L')  # for print_barcode2
     px = im.load()
     width, height = im.width, im.height
 
