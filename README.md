@@ -5,8 +5,7 @@ Completed by Derrick Eckardt on February 12, 2019.  Please direct any questions 
 The assignment prompt can be found at [Assignment 1 Prompt](https://github.iu.edu/cs-b657-sp2019/derrick-a1/blob/master/a1.pdf)
 
 # General Comments
-All I could think about this was the many different ways students could break a well designed system.  Overall, I am really happy with how grade.py turned out.  I think I could spend weeks more on inject/extractin order to get a system that could get read despite being printed and scanned twice, which is surely going to mess with the values.
-
+All I could think about this was the many different ways students could break a well designed system.  Overall, I am really happy with how grade.py turned out.  I think I could spend weeks more on inject/extractin order to get a system that could get read despite being printed and scanned twice, which is surely going to mess with the values.  I am really happy with the 99.3% accurancy I got on grade.py (spoiler alert!).  I also think there are plenty of ways to improve all of these files, and also provide some recommendations on how inject and extract should be done with a different approach that reduces a lot of the issues I found with the request implementation.
 
 # Grading program - grade.py - The Problem
 First, the problem is presented with a answer sheet for a test.  It's a typical looking bubblesheet, with 85 questions.  The goal is to write a program that can read the answers filled out the by the student, determine if they put relevant markings in the margins, and then output this into two documents.  The first one is a text file that gives the letters and markings for each question, in a format specified in the prompt.  The second document is a copy of the student's completed answer sheet that has been annotated with the answers and margin markings the grade.py program found.
@@ -139,8 +138,7 @@ While looking for a better way to do Attempt 1, I realized I could do a much cle
 
 To determine whether a square was checked, I attempted to locate the center of the square, and then vote with the 9 center most pixels.  This was done to account for any noise that might have flipped the pixels. I ran into problems with this one because it also did not like scaling.
 
-Given the two options, I went the barcode, as it seemed to work the best overall.
-
+Given the two options I had working, I went the barcode, as it seemed to work the best overall.
 
 ## Security measures
 Since, I was essentially setting up a 2-D grid of the answers, some sort of security would be needed.  Since there were 85 questions, i created a string of 85 numbers ranging from 0 to 4, which would indicate how many the actual values would be rotated.  It would also be a bit taunting showing the answers are there, just scrambled a bit.
@@ -159,29 +157,3 @@ Rather than dealing with absolute values, I would come up with something that cr
 
 ### Find Better Way to Deal with Scale
 Overall, I was very unhappy with the methods that I came up with the variablity in scale that would likely happy.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
