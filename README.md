@@ -4,6 +4,10 @@ Completed by Derrick Eckardt on February 12, 2019.  Please direct any questions 
 
 The assignment prompt can be found at [Assignment 1 Prompt](https://github.iu.edu/cs-b657-sp2019/derrick-a1/blob/master/a1.pdf)
 
+# General Comments
+All I could think about this was the many different ways students could break a well designed system.  Overall, I am really happy with how grade.py turned out.  I think I could spend weeks more on inject/extractin order to get a system that could get read despite being printed and scanned twice, which is surely going to mess with the values.
+
+
 # Grading program - grade.py - The Problem
 First, the problem is presented with a answer sheet for a test.  It's a typical looking bubblesheet, with 85 questions.  The goal is to write a program that can read the answers filled out the by the student, determine if they put relevant markings in the margins, and then output this into two documents.  The first one is a text file that gives the letters and markings for each question, in a format specified in the prompt.  The second document is a copy of the student's completed answer sheet that has been annotated with the answers and margin markings the grade.py program found.
 
@@ -114,23 +118,49 @@ This code takes less than one minute to run scoresheet.  I think with a better d
 ### Adding a line to the instructions
 With that previous point and the earlier discussion about student intent, the instructions should be updated to indicate that "any marks" might result in incorrect grading, so students should be careful with their pens.  I might go as far as banning erasing, and requiring the notes in the margin, since those can be picked up fairly easily.
 
-# Answer Injecting - Inject.py - The Problem
+# Answer Injecting and Extracting- Inject.py and Extract.py - The Problem
+Here, we were tasked with injecting some sort of encoding that allowed
+
+# Attempt 1 -  1D Barcode
+This is a rather straightforward approach.  I went from 1 to 85, left to right, and a through A.  If the value was True, it printed in black, if not, it printed in white.  There were spacer bars added to throw off where it began.
+
+## Extracting the measures
+Then, when extract.py ran, it looked for the beginning, went past the spacer bars, and then started counting what it found at each three pixels.  To account for noise, I took samples at 5 difference cross-sections of the bar code
+
+## Security measures
+This is pretty low on the security, but effective.  The bar code is not a natural thing to look at it.  Plus, I added leading and trailing bars of different lengths that could confuse the student, if s/he was attempting to decode while taking the test.  The bars are only 3 pixels wide. Even a program that didn't know it, wouldn't necessarily figure it out without
+
+One low-fidelty security measure I attempted was having it generate the bars in random red,blue, or green.  The thought would be it would make the barcode look that much harder, and it added implied meaning, but no actual meaning.  You can see this as an artificat in the code that the document is encoded in RGB instead of black and white.
+
+# Attempt 2 - 2D Barcode with Encryption
+While looking for a better way to do Attempt 1, I realized I could do a much cleaner version if I went into two-dimensions.  This is more akin to a QR code.   I put a spacer bar on the left, and dots on the top for orientation.
+
+    This is currently deactivated.  If you would like to see this one, in inject.py change line 132 to convert to L instead of RGB (as is written in the comment on line 133), and then change line 138 to print_barcode2.  Similar change has to be made in extract.py
+
+To determine whether a square was checked, I attempted to locate the center of the square, and then vote with the 9 center most pixels.  This was done to account for any noise that might have flipped the pixels. I ran into problems with this one because it also did not like scaling.
+
+Given the two options, I went the barcode, as it seemed to work the best overall.
+
+
+## Security measures
+Since, I was essentially setting up a 2-D grid of the answers, some sort of security would be needed.  Since there were 85 questions, i created a string of 85 numbers ranging from 0 to 4, which would indicate how many the actual values would be rotated.  It would also be a bit taunting showing the answers are there, just scrambled a bit.
 
 ## Results
+It works.  Both of them.  However, the thing that is the most concern to me is what happens when it gets printed and then rescanned.  A 1% in reduction in size, means 17 fewer pixels, which need to come from somewhere in our barcodes.
 
 ## Recommendations
+Here are some thoughts I had on how to make this better.
+
+### Why Are We Overcomplicating it?
+Rather than encoding the answers and then extracting them, which could introduce for the reasons I've pointed out, why not just print, in large, noise-absorbing letter a 6-digit serial number.  Since as we learned that OCR is well developed for things like digits and letters, this would be rather straightforward (and something we did last semester in B551).  Then, the serial number would correspond to the answer set, which would reside on the instructor's computer.  That answer set would have already been generated when the student's test was generated.  This way we make it really easy to outmate the answer key for a particular test, but we don't have to worry about things like noise and scale reductions caused by scanning and printing.
+
+### Better algorith
+Rather than dealing with absolute values, I would come up with something that crawled my bar code, looking for differences, and if things shrank or were widened, it wouldn't matter, because only the differences would matter.  Overall, not really happy with how it came out, there is definitely room for improvement on the injecting algorithm in order to facilitate better extraction.
+
+### Find Better Way to Deal with Scale
+Overall, I was very unhappy with the methods that I came up with the variablity in scale that would likely happy.
 
 
-# Answer Extracting - Extract.py - The Problem
-
-## Results
-
-## Recommendations
-
-### Potential Scanning Issues
-The biggest concern I have is that the extracting  is dependent on the document being printed and scanned at the same exact size as when the barcode was injected.  If an image is scanned or printed at 96% of its actual size, that casues the interior of the document to be 68 pixels short.  How is that handled?
-
-I attempted to account for that, but as I mentioned earlier, you never know how things like that can be distorted and can make it just not possible for the bar code to function.
 
 
 
