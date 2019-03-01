@@ -22,11 +22,13 @@
 
 # Import libraries
 import sys
-#import image
-#from image import Image, ImageFilter
+import Image
+import image
 import PIL
 import cProfile
 from PIL import Image, ImageFilter
+import Image
+import image
 import math
 from operator import itemgetter
 
